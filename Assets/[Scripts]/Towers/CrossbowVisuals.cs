@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CrossbowVisuals : MonoBehaviour
 {
-    private TowerCrossbow towerCrossbow;
+    private Enemy enemy;
 
     [SerializeField] private LineRenderer attackVisuals;
     [SerializeField] private float attackVisualDuration = 0.1f;
@@ -50,7 +50,6 @@ public class CrossbowVisuals : MonoBehaviour
 
     private void Awake()
     {
-        towerCrossbow = GetComponent<TowerCrossbow>();
         material = new Material(meshRenderer.material);
         meshRenderer.material = material;
 
@@ -59,6 +58,13 @@ public class CrossbowVisuals : MonoBehaviour
         StartCoroutine(ChangeEmission(1));
     }
 
+
+    private void Update()
+    {
+        EmissionAlert();
+        UpdateStrings();
+        UpdateAttackVisualsIfNeeded();
+    }
     private void UpdateLineRenderersMaterials()
     {
         foreach (LineRenderer lr in lineRenderers)
@@ -67,10 +73,10 @@ public class CrossbowVisuals : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void UpdateAttackVisualsIfNeeded()
     {
-        EmissionAlert();
-        UpdateStrings();
+        if (attackVisuals.enabled && enemy != null)
+            attackVisuals.SetPosition(1, enemy.CenterPoint());
     }
 
     private void UpdateStrings()
@@ -98,14 +104,15 @@ public class CrossbowVisuals : MonoBehaviour
         StartCoroutine(UpdateRotorPosition(newDuration));
     }
 
-    public void PlayAttackFX(Vector3 starPoint, Vector3 endPoint)
+    public void PlayAttackFX(Vector3 starPoint, Vector3 endPoint, Enemy newEnemy)
     {
-        StartCoroutine(VFXCoroutine(starPoint, endPoint));
+        StartCoroutine(VFXCoroutine(starPoint, endPoint, newEnemy));
     }
 
-    private IEnumerator VFXCoroutine(Vector3 starPoint, Vector3 endPoint)
+    private IEnumerator VFXCoroutine(Vector3 starPoint, Vector3 endPoint, Enemy newEnemy)
     {
-        towerCrossbow.EnableRotation(false);
+        //towerCrossbow.EnableRotation(false);
+        enemy = newEnemy;
 
         attackVisuals.enabled = true;
 
@@ -116,7 +123,7 @@ public class CrossbowVisuals : MonoBehaviour
 
         attackVisuals.enabled = false;
 
-        towerCrossbow.EnableRotation(true);
+        //towerCrossbow.EnableRotation(true);
     }
 
     private IEnumerator ChangeEmission(float duration)
